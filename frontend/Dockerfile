@@ -10,10 +10,8 @@ RUN npm ci
 # Copy source and build
 COPY . .
 
-# Build arg for API URL (can be overridden at build time)
-ARG VITE_API_URL=http://localhost:8000
-ENV VITE_API_URL=$VITE_API_URL
-
+# Don't set VITE_API_URL - nginx proxies /api/ to backend
+# This makes the frontend use relative URLs which nginx handles
 RUN npm run build
 
 # Production stage - serve with nginx
