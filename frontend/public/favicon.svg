@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <circle cx="50" cy="55" r="40" fill="#8B4513"/>
+  <ellipse cx="50" cy="55" rx="32" ry="30" fill="#3d3d3d"/>
+  <ellipse cx="50" cy="52" rx="26" ry="22" fill="#5D2F0A"/>
+  <!-- Steam wisps -->
+  <path d="M35 20 Q32 10 38 5" stroke="#888" stroke-width="3" fill="none" stroke-linecap="round"/>
+  <path d="M50 15 Q47 5 53 0" stroke="#888" stroke-width="3" fill="none" stroke-linecap="round"/>
+  <path d="M65 20 Q62 10 68 5" stroke="#888" stroke-width="3" fill="none" stroke-linecap="round"/>
+  <!-- Handle -->
+  <path d="M85 45 Q100 45 100 60 Q100 75 85 75" stroke="#8B4513" stroke-width="8" fill="none" stroke-linecap="round"/>
+</svg>
