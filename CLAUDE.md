@@ -6,10 +6,15 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 Roast Tracker 2000 is a full-stack web application for managing and analyzing artisan coffee roast logs from Artisan roasting software. It parses `.alog` files (Python dictionary literals), stores comprehensive roast data, and provides visualization of temperature curves and roast metrics.
 
+**Live Site:** https://roasts.everbeancoffee.com
+
+**Repository:** https://github.com/ulchm/roast_tracker_2000
+
 **Tech Stack:**
 - Backend: Django 5.0 + Django REST Framework (JWT auth with djangorestframework-simplejwt)
 - Frontend: React (Vite) + Chart.js for interactive temperature graphs
-- Database: SQLite (dev) / PostgreSQL (production-ready)
+- Database: SQLite with persistent storage
+- Deployment: Docker Compose on Unraid server with HTTPS via reverse proxy
 
 ## Development Commands
 
@@ -134,7 +139,9 @@ Sample roast files are stored in the `Roasts/` directory at project root. These 
 
 ## Docker Deployment (Production)
 
-The app is deployed via Docker Compose on an Unraid server.
+The app is deployed via Docker Compose on an Unraid server at https://roasts.everbeancoffee.com.
+
+**Server:** Unraid with Nginx Proxy Manager handling HTTPS/SSL termination.
 
 ### Files
 
@@ -142,7 +149,7 @@ The app is deployed via Docker Compose on an Unraid server.
 - `backend/Dockerfile` - Django app with gunicorn
 - `backend/docker-entrypoint.sh` - Runs migrations and creates default user on startup
 - `frontend/Dockerfile` - Multi-stage build: Vite → nginx
-- `frontend/nginx.conf` - Proxies `/api/` and `/media/` to backend container
+- `frontend/nginx.conf` - Proxies `/api/`, `/admin/`, `/static/`, and `/media/` to backend container
 - `.env.example` - Environment variable template
 
 ### Commands
@@ -181,6 +188,8 @@ Django settings use env vars `DATA_DIR` and `MEDIA_ROOT` to point to these paths
 Key vars in `.env` (see `.env.example`):
 - `SECRET_KEY` - Django secret key
 - `ALLOWED_HOSTS` - Comma-separated hostnames/IPs
+- `CORS_ORIGINS` - Allowed CORS origins for API
+- `CSRF_TRUSTED_ORIGINS` - Trusted origins for Django admin (must include https:// for HTTPS sites)
 - `FRONTEND_PORT` - Host port for frontend (default 3080)
 
 ### Default Credentials
@@ -196,4 +205,8 @@ Key vars in `.env` (see `.env.example`):
 
 ## Admin Interface
 
-Django admin available at `http://localhost:8000/admin/` (dev) or `http://<host>:3080/api/admin/` (Docker) - provides full CRUD on Roast model with all fields visible.
+Django admin available at:
+- Development: http://localhost:8000/admin/
+- Production: https://roasts.everbeancoffee.com/admin/
+
+Provides full CRUD on Roast model with all fields visible.
