@@ -8,10 +8,10 @@ services:
       - SECRET_KEY=${SECRET_KEY:-change-me-in-production}
       - ALLOWED_HOSTS=${ALLOWED_HOSTS:-localhost,127.0.0.1}
       - CORS_ORIGINS=${CORS_ORIGINS:-http://localhost:3000}
-      - DATABASE_URL=${DATABASE_URL:-sqlite:///db.sqlite3}
     volumes:
-      - backend_data:/app/db
-      - media_data:/app/media
+      # Persistent storage - adjust paths for your Unraid setup
+      - ./data:/app/data
+      - ./media:/app/media
     ports:
       - "8000:8000"
     healthcheck:
@@ -21,17 +21,10 @@ services:
       retries: 3
 
   frontend:
-    build:
-      context: ./frontend
-      args:
-        - VITE_API_URL=${API_URL:-http://localhost:8000}
+    build: ./frontend
     container_name: roast-tracker-frontend
     restart: unless-stopped
     ports:
       - "${FRONTEND_PORT:-3080}:80"
     depends_on:
       - backend
-
-volumes:
-  backend_data:
-  media_data:
