@@ -132,13 +132,68 @@ Key field categories:
 
 Sample roast files are stored in the `Roasts/` directory at project root. These contain real roast data and can be used for testing imports/uploads.
 
-## Database Notes
+## Docker Deployment (Production)
+
+The app is deployed via Docker Compose on an Unraid server.
+
+### Files
+
+- `docker-compose.yml` - Orchestrates backend and frontend containers
+- `backend/Dockerfile` - Django app with gunicorn
+- `backend/docker-entrypoint.sh` - Runs migrations and creates default user on startup
+- `frontend/Dockerfile` - Multi-stage build: Vite → nginx
+- `frontend/nginx.conf` - Proxies `/api/` and `/media/` to backend container
+- `.env.example` - Environment variable template
+
+### Commands
+
+```bash
+# Build and start containers
+docker compose up -d --build
+
+# View logs
+docker compose logs -f
+
+# Rebuild after code changes
+docker compose down
+docker compose build --no-cache
+docker compose up -d
+
+# Access backend shell
+docker compose exec backend python manage.py shell
+```
+
+### Persistent Storage
+
+Data persists via bind mounts (not named volumes):
+- `./data/db.sqlite3` - SQLite database
+- `./media/` - Uploaded .alog files and images
+
+Django settings use env vars `DATA_DIR` and `MEDIA_ROOT` to point to these paths.
+
+### Ports
+
+- Frontend: `${FRONTEND_PORT:-3080}` (nginx serves static + proxies API)
+- Backend: `8000` (internal, not exposed to host by default)
+
+### Environment Variables
+
+Key vars in `.env` (see `.env.example`):
+- `SECRET_KEY` - Django secret key
+- `ALLOWED_HOSTS` - Comma-separated hostnames/IPs
+- `FRONTEND_PORT` - Host port for frontend (default 3080)
+
+### Default Credentials
+
+- Username: `admin`
+- Password: `roastmaster`
+
+## Database Notes (Development)
 
 - Default: SQLite at `backend/db.sqlite3`
-- For production (Unraid deployment): Configure PostgreSQL in `settings.py` (psycopg2-binary already in requirements)
 - CORS configured for `localhost:5173` and `localhost:3000`
 - Media files stored in `backend/media/` (alogs/, roast_images/)
 
 ## Admin Interface
 
-Django admin available at `http://localhost:8000/admin/` - provides full CRUD on Roast model with all fields visible.
+Django admin available at `http://localhost:8000/admin/` (dev) or `http://<host>:3080/api/admin/` (Docker) - provides full CRUD on Roast model with all fields visible.
