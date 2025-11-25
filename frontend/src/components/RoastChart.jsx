@@ -362,6 +362,17 @@ export default function RoastChart({ roast }) {
       font: { size: 10, weight: 'bold' },
     }
   };
+  // CHARGE temperature annotation
+  if (roast.charge_bt) {
+    annotations.chargeTempLabel = {
+      type: 'label',
+      xValue: chargeLabel,
+      yValue: roast.charge_bt + 8,
+      content: roast.charge_bt.toFixed(1),
+      color: '#FFFFFF',
+      font: { size: 9 },
+    };
+  }
 
   // TP (Turning Point)
   if (roast.tp_time) {
@@ -736,6 +747,12 @@ export default function RoastChart({ roast }) {
       {/* Quick Stats Section - Artisan style */}
       <div style={styles.statsSection}>
         <div style={styles.statsRow}>
+          {roast.charge_bt && (
+            <div style={styles.stat}>
+              <span style={styles.statLabel}>CHARGE:</span>
+              <span style={styles.statValue}>{roast.charge_bt?.toFixed(1)}°C</span>
+            </div>
+          )}
           {roast.tp_time && (
             <div style={styles.stat}>
               <span style={styles.statLabel}>TP:</span>

@@ -106,11 +106,6 @@ export default function Login({ onLoginSuccess }) {
           </button>
         </form>
 
-        <div style={styles.defaultCreds}>
-          <p style={styles.defaultCredsTitle}>Default Credentials:</p>
-          <p>Username: <strong>admin</strong></p>
-          <p>Password: <strong>roastmaster</strong></p>
-        </div>
       </div>
     </div>
   );
@@ -244,20 +239,5 @@ const styles = {
     color: '#9E9E9E',
     cursor: 'not-allowed',
     boxShadow: 'none',
-  },
-  defaultCreds: {
-    marginTop: '28px',
-    padding: '20px',
-    background: 'linear-gradient(135deg, #E3F2FD 0%, #BBDEFB 100%)',
-    borderRadius: '12px',
-    border: '2px solid #90CAF9',
-    fontSize: '14px',
-    lineHeight: '1.6',
-  },
-  defaultCredsTitle: {
-    fontWeight: '700',
-    color: '#1565C0',
-    marginBottom: '10px',
-    marginTop: 0,
   },
 };

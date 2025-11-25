@@ -8,14 +8,22 @@ import { roastAPI } from '../api';
 import RoastChart from './RoastChart';
 import {
   FaArrowLeft, FaCoffee, FaCalendar, FaClock, FaUser, FaBuilding,
-  FaFire, FaWeight, FaChartLine, FaExclamationTriangle, FaStickyNote
+  FaFire, FaWeight, FaChartLine, FaExclamationTriangle, FaStickyNote, FaTrash
 } from 'react-icons/fa';
+
+// Parse date string without timezone conversion (avoids off-by-one day issues)
+const parseLocalDate = (dateStr) => {
+  const [year, month, day] = dateStr.split('-').map(Number);
+  return new Date(year, month - 1, day);
+};
 
 export default function RoastDetail({ onBack }) {
   const { id: roastId } = useParams();
   const [roast, setRoast] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [deleting, setDeleting] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   useEffect(() => {
     if (roastId) {
@@ -61,12 +69,57 @@ export default function RoastDetail({ onBack }) {
     return `${mins}:${secs.toString().padStart(2, '0')}`;
   };
 
+  const handleDelete = async () => {
+    setDeleting(true);
+    try {
+      await roastAPI.delete(roastId);
+      onBack();
+    } catch (err) {
+      setError('Failed to delete roast');
+      setDeleting(false);
+      setShowDeleteConfirm(false);
+    }
+  };
+
   return (
     <div style={styles.container}>
-      <button onClick={onBack} style={styles.backButton}>
-        <FaArrowLeft style={styles.buttonIcon} />
-        Back to List
-      </button>
+      {showDeleteConfirm && (
+        <div style={styles.deleteOverlay}>
+          <div style={styles.deleteModal}>
+            <h3 style={styles.deleteModalTitle}>Delete Roast?</h3>
+            <p style={styles.deleteModalText}>
+              Are you sure you want to delete "{roast.title}"? This action cannot be undone.
+            </p>
+            <div style={styles.deleteModalButtons}>
+              <button
+                onClick={() => setShowDeleteConfirm(false)}
+                style={styles.cancelButton}
+                disabled={deleting}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleDelete}
+                style={styles.confirmDeleteButton}
+                disabled={deleting}
+              >
+                {deleting ? 'Deleting...' : 'Delete'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      <div style={styles.buttonRow}>
+        <button onClick={onBack} style={styles.backButton}>
+          <FaArrowLeft style={styles.buttonIcon} />
+          Back to List
+        </button>
+        <button onClick={() => setShowDeleteConfirm(true)} style={styles.deleteButton}>
+          <FaTrash style={styles.buttonIcon} />
+          Delete Roast
+        </button>
+      </div>
 
       <div style={styles.header}>
         <div style={styles.titleSection}>
@@ -92,7 +145,7 @@ export default function RoastDetail({ onBack }) {
             <div style={styles.field}>
               <FaCalendar style={styles.fieldIcon} />
               <span style={styles.label}>Date:</span>
-              <span>{format(new Date(roast.roast_date), 'MMMM d, yyyy')}</span>
+              <span>{format(parseLocalDate(roast.roast_date), 'MMMM d, yyyy')}</span>
             </div>
             <div style={styles.field}>
               <FaClock style={styles.fieldIcon} />
@@ -294,6 +347,14 @@ const styles = {
     fontSize: '18px',
     boxShadow: '0 4px 16px rgba(0, 0, 0, 0.08)',
   },
+  buttonRow: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: '28px',
+    flexWrap: 'wrap',
+    gap: '12px',
+  },
   backButton: {
     display: 'flex',
     alignItems: 'center',
@@ -306,12 +367,83 @@ const styles = {
     cursor: 'pointer',
     fontSize: '15px',
     fontWeight: '600',
-    marginBottom: '28px',
     boxShadow: '0 4px 12px rgba(33, 150, 243, 0.3)',
+    transition: 'all 0.3s ease',
+  },
+  deleteButton: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '10px',
+    padding: '14px 28px',
+    background: 'linear-gradient(135deg, #F44336 0%, #D32F2F 100%)',
+    color: 'white',
+    border: 'none',
+    borderRadius: '12px',
+    cursor: 'pointer',
+    fontSize: '15px',
+    fontWeight: '600',
+    boxShadow: '0 4px 12px rgba(244, 67, 54, 0.3)',
     transition: 'all 0.3s ease',
   },
   buttonIcon: {
     fontSize: '14px',
+  },
+  deleteOverlay: {
+    position: 'fixed',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'rgba(0, 0, 0, 0.6)',
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+    zIndex: 1000,
+  },
+  deleteModal: {
+    background: 'white',
+    borderRadius: '16px',
+    padding: '32px',
+    maxWidth: '400px',
+    width: '90%',
+    boxShadow: '0 20px 60px rgba(0, 0, 0, 0.3)',
+  },
+  deleteModalTitle: {
+    margin: '0 0 16px 0',
+    fontSize: '24px',
+    fontWeight: '700',
+    color: '#212121',
+  },
+  deleteModalText: {
+    margin: '0 0 24px 0',
+    fontSize: '15px',
+    color: '#616161',
+    lineHeight: '1.6',
+  },
+  deleteModalButtons: {
+    display: 'flex',
+    gap: '12px',
+    justifyContent: 'flex-end',
+  },
+  cancelButton: {
+    padding: '12px 24px',
+    background: '#E0E0E0',
+    color: '#424242',
+    border: 'none',
+    borderRadius: '8px',
+    cursor: 'pointer',
+    fontSize: '15px',
+    fontWeight: '600',
+  },
+  confirmDeleteButton: {
+    padding: '12px 24px',
+    background: 'linear-gradient(135deg, #F44336 0%, #D32F2F 100%)',
+    color: 'white',
+    border: 'none',
+    borderRadius: '8px',
+    cursor: 'pointer',
+    fontSize: '15px',
+    fontWeight: '600',
   },
   header: {
     display: 'flex',

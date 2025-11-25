@@ -115,8 +115,8 @@ export default function Upload({ onUploadSuccess }) {
         <p style={styles.dropZoneSubtext}>or</p>
         <input
           type="file"
-          accept=".alog"
-          multiple
+          accept=".alog,application/octet-stream"
+          multiple={true}
           onChange={handleFileSelect}
           style={styles.fileInput}
           id="file-upload"

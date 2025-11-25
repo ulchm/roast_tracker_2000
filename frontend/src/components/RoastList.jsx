@@ -5,6 +5,12 @@ import { useState } from 'react';
 import { format } from 'date-fns';
 import { FaCalendar, FaCoffee, FaUser, FaThermometerHalf, FaClock, FaFire } from 'react-icons/fa';
 
+// Parse date string without timezone conversion (avoids off-by-one day issues)
+const parseLocalDate = (dateStr) => {
+  const [year, month, day] = dateStr.split('-').map(Number);
+  return new Date(year, month - 1, day);
+};
+
 export default function RoastList({ roasts, onSelectRoast, loading }) {
   const [hoveredCard, setHoveredCard] = useState(null);
 
@@ -39,7 +45,7 @@ export default function RoastList({ roasts, onSelectRoast, loading }) {
             <div style={styles.cardHeader}>
               <FaCoffee style={styles.headerIcon} />
               <div style={styles.dateBox}>
-                {format(new Date(roast.roast_date), 'MMM d')}
+                {format(parseLocalDate(roast.roast_date), 'MMM d')}
               </div>
             </div>
 
@@ -50,7 +56,7 @@ export default function RoastList({ roasts, onSelectRoast, loading }) {
                 <div style={styles.info}>
                   <FaCalendar style={styles.icon} />
                   <span>
-                    {format(new Date(roast.roast_date), 'MMM d, yyyy')} at {roast.roast_time}
+                    {format(parseLocalDate(roast.roast_date), 'MMM d, yyyy')} at {roast.roast_time}
                   </span>
                 </div>
 
